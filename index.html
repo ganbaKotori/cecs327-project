@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <style>
+      #map {
+        height: 600px;
+        width: 100%;
+      }
+    </style>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBfGNR38S8ZFUE4hfIMTYp-BomBrUSIkN8&callback=initMap"
+      async
+      defer
+    ></script>
+
+    <title>Da hoods</title>
+  </head>
+  <body>
+    <h1>Da hood</h1>
+    <div id="map"></div>
+    <script>
+      function initMap() {
+        //map options
+        var options = {
+          zoom: 8,
+          center: {
+            lat: 41.8781,
+            lng: -87.6298
+          }
+        };
+
+        var map = new google.maps.Map(document.getElementById("map"), options);
+
+        google.maps.event.addListener(map, "click", function(event) {
+          addMarker({
+            coords: event.latLng
+          });
+        });
+
+        var markers = [
+          {
+            coords: { lat: 41.754829, lng: -87.550663 },
+            iconImage: "kanye.jpg",
+            content: "<h1>House where Kanye West grew up in</h1>"
+          }
+        ];
+
+        for (var i = 0; i < markers.length; i++) {
+          addMarker(markers[i]);
+        }
+
+        //add Marker function
+        function addMarker(props) {
+          var marker = new google.maps.Marker({
+            position: props.coords,
+            map: map
+          });
+          //check for custom icon
+          if (props.iconImage) {
+            //set custom image
+            marker.setIcon(props.iconImage);
+          }
+
+          if (props.content) {
+            var infoWindow = new google.maps.InfoWindow({
+              content: props.content
+            });
+
+            marker.addListener("click", function() {
+              infoWindow.open(map, marker);
+            });
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
