@@ -1,31 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <link rel="stylesheet" href="styles.css" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <style>
-      #map {
-        height: 600px;
-        width: 100%;
-      }
-    </style>
     <script
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBfGNR38S8ZFUE4hfIMTYp-BomBrUSIkN8&callback=initMap"
       async
       defer
     ></script>
-
-    <title>Chicago Project</title>
-  </head>
-  <body>
-    <h1>Chicago Project</h1>
-    <div id="map"></div>
     <script>
       function initMap() {
+        var request = new XMLHttpRequest();
+        var request2 = new XMLHttpRequest();
+        var request3 = new XMLHttpRequest();
+        var markers = [];
+        // Open a new connection, using the GET request on the URL endpoint
+        //request.open("GET", "http://localhost:3000/", true);
+        var checkBox = document.getElementById("myCheck");
+        var checkBox2 = document.getElementById("myCheck2");
+        var checkBox3 = document.getElementById("myCheck3");
+
+        request.open(
+          "GET",
+          "https://data.cityofchicago.org/resource/v6vf-nfxy.json?$where=created_date%20between%20%27" +
+            document.getElementById("startDate").value +
+            "T12:00:00%27%20and%20%27" +
+            document.getElementById("endDate").value +
+            "T14:00:00%27&sr_short_code=" +
+            document.getElementById("myText").value,
+          true
+        );
+        request2.open(
+          "GET",
+          "https://data.cityofchicago.org/resource/85ca-t3if.json?$where=crash_date%20between%20%27" +
+            document.getElementById("startDate").value +
+            "T12:00:00%27%20and%20%27" +
+            document.getElementById("endDate").value +
+            "T14:00:00%27",
+          true
+        );
+        request3.open(
+          "GET",
+          "https://data.cityofchicago.org/resource/ijzp-q8t2.json?$where=date%20between%20%27" +
+            document.getElementById("startDate").value +
+            "T12:00:00%27%20and%20%27" +
+            document.getElementById("endDate").value +
+            "T14:00:00",
+          true
+        );
+        request.onload = function() {
+          // Begin accessing JSON data here
+          var data = JSON.parse(this.response);
+          //console.log(data);
+          for (var key in data) {
+            //if (data.data[prop].sr_short_code == "AVN")
+            console.log(data[key].latitude);
+            markers.push({
+              coords: {
+                lat: parseFloat(data[key].latitude),
+                lng: parseFloat(data[key].longitude)
+              },
+              content: data[key].sr_type + " <br/> " + data[key].created_date,
+              iconImage: "phone.png"
+            });
+          }
+        };
+
+        request2.onload = function() {
+          // Begin accessing JSON data here
+          var data = JSON.parse(this.response);
+          //console.log(data);
+          for (var key in data) {
+            console.log(data[key].crash_date);
+            markers.push({
+              coords: {
+                lat: parseFloat(data[key].latitude),
+                lng: parseFloat(data[key].longitude)
+              },
+              content:
+                data[key].first_crash_type + " <br/> " + data[key].crash_date,
+              iconImage: "car.png"
+            });
+          }
+        };
+
+        request3.onload = function() {
+          // Begin accessing JSON data here
+          var data = JSON.parse(this.response);
+          //console.log(data);
+          for (var key in data) {
+            console.log(data[key].date);
+            markers.push({
+              coords: {
+                lat: parseFloat(data[key].latitude),
+                lng: parseFloat(data[key].longitude)
+              },
+              content: data[key].description + " <br/> " + data[key].date,
+              iconImage: "car.png"
+            });
+          }
+        };
+
+        // Send requests
+        if (checkBox.checked == true) {
+          request.send();
+        }
+        if (checkBox2.checked == true) {
+          request2.send();
+        }
+        if (checkBox2.checked == true) {
+          request3.send();
+        }
+
         //map options
         var options = {
-          zoom: 8,
+          zoom: 11,
           center: {
             lat: 41.8781,
             lng: -87.6298
@@ -34,23 +125,28 @@
 
         var map = new google.maps.Map(document.getElementById("map"), options);
 
-        google.maps.event.addListener(map, "click", function(event) {
+        /*google.maps.event.addListener(map, "click", function(event) {
           addMarker({
             coords: event.latLng
           });
         });
-
         var markers = [
           {
             coords: { lat: 41.754829, lng: -87.550663 },
-            iconImage: "kanye.jpg",
-            content: "<h1>House where Kanye West grew up in</h1>"
+            iconImage: "phone.png",
+            content: "<h1>House where phone pngphone.pngt grew up in</h1>"
           }
-        ];
+        ];*/
 
-        for (var i = 0; i < markers.length; i++) {
-          addMarker(markers[i]);
-        }
+        setTimeout(function() {
+          console.log("marker info start");
+          console.log(markers.length);
+          console.log(markers);
+          console.log("marker info end");
+          for (var i = 0; i < markers.length; i++) {
+            addMarker(markers[i]);
+          }
+        }, 1000);
 
         //add Marker function
         function addMarker(props) {
@@ -76,5 +172,449 @@
         }
       }
     </script>
+    <title>Open311 API - City of Chicago</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>City of Chicago Smart City Center</h1>
+      <p>
+        Chicago's 311 system gives residents a central phone number and location
+        to request city services, report non-emergency issues, and get updates
+        on city work. Open311 provides greater access and transparency since it
+        allows developers to build apps and websites on top of Chicago's 311
+        system. Open311 is a REST-based Application Programmer Inferface (API)
+        that lets developers requests directly to 311 and also retrieve status
+        on existing service requests.
+      </p>
+      <table style="width:100%">
+        <tr>
+          <td>
+            Start date <input type="text" id="startDate" value="2020-02-01" /> |
+            End date <input type="text" id="endDate" value="2020-02-08" />
+            <button onclick="initMap()">Search</button>
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>
+            <img src="phone.png" /><input
+              type="checkbox"
+              id="myCheck"
+              onclick="initMap()"
+            />
+            Service Code for 311 Requests:
+            <input type="text" id="myText" value="SEL" />
+            <button onclick="initMap()">Search</button>
+          </td>
+          <td>
+            <img src="car.png" /><input
+              type="checkbox"
+              id="myCheck2"
+              onclick="initMap()"
+            />
+            Car Crashes
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div id="map"></div>
+    <br />
+    <div>
+      <table class="tableizer-table">
+        <thead>
+          <tr class="tableizer-firstrow">
+            <th>SR_TYPE</th>
+            <th>SR_SHORT_CODE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>311 INFORMATION ONLY CALL</td>
+            <td>311IOC</td>
+          </tr>
+          <tr>
+            <td>Abandoned Vehicle Complaint</td>
+            <td>SKA</td>
+          </tr>
+          <tr>
+            <td>Aircraft Noise Complaint</td>
+            <td>AVN</td>
+          </tr>
+          <tr>
+            <td>Alley Light Out Complaint</td>
+            <td>SFA</td>
+          </tr>
+          <tr>
+            <td>Alley Pothole Complaint</td>
+            <td>PHB</td>
+          </tr>
+          <tr>
+            <td>Alley Sewer Inspection Request</td>
+            <td>AAI</td>
+          </tr>
+          <tr>
+            <td>Animal In Trap Complaint</td>
+            <td>EBD</td>
+          </tr>
+          <tr>
+            <td>Bee/Wasp Removal</td>
+            <td>SGG</td>
+          </tr>
+          <tr>
+            <td>Bicycle Request/Complaint</td>
+            <td>PCL</td>
+          </tr>
+          <tr>
+            <td>Building Violation</td>
+            <td>BBA</td>
+          </tr>
+          <tr>
+            <td>Bungalow Rehab/Purchase Information Request</td>
+            <td>BUNGALOW</td>
+          </tr>
+          <tr>
+            <td>Cab Feedback</td>
+            <td>CSC</td>
+          </tr>
+          <tr>
+            <td>Cable TV Complaint</td>
+            <td>OCC</td>
+          </tr>
+          <tr>
+            <td>City Vehicle Sticker Violation</td>
+            <td>QAC</td>
+          </tr>
+          <tr>
+            <td>Clean and Green Program Request</td>
+            <td>NAA</td>
+          </tr>
+          <tr>
+            <td>Clean Vacant Lot Request</td>
+            <td>SCT</td>
+          </tr>
+          <tr>
+            <td>Consumer Fraud Complaint</td>
+            <td>CSF</td>
+          </tr>
+          <tr>
+            <td>Consumer Retail Store Complaint</td>
+            <td>CST</td>
+          </tr>
+          <tr>
+            <td>Coyote Interaction Complaint</td>
+            <td>CIAC</td>
+          </tr>
+          <tr>
+            <td>Dead Animal Pick-Up Request</td>
+            <td>SGQ</td>
+          </tr>
+          <tr>
+            <td>Dead Bird</td>
+            <td>SGV</td>
+          </tr>
+          <tr>
+            <td>E-Scooter</td>
+            <td>PCL3</td>
+          </tr>
+          <tr>
+            <td>Extreme Weather Notification</td>
+            <td>JNS</td>
+          </tr>
+          <tr>
+            <td>Fire Safety Inspection Request</td>
+            <td>FAC</td>
+          </tr>
+          <tr>
+            <td>Fly Dumping Complaint</td>
+            <td>SDR</td>
+          </tr>
+          <tr>
+            <td>Garbage Cart Maintenance</td>
+            <td>SIE</td>
+          </tr>
+          <tr>
+            <td>Graffiti Removal Request</td>
+            <td>GRAF</td>
+          </tr>
+          <tr>
+            <td>Home Buyer Program Info Request</td>
+            <td>HOP</td>
+          </tr>
+          <tr>
+            <td>Ice and Snow Removal Request</td>
+            <td>SDO</td>
+          </tr>
+          <tr>
+            <td>Inaccurate Fuel Pump Complaint</td>
+            <td>FPC</td>
+          </tr>
+          <tr>
+            <td>Inaccurate Retail Scales Complaint</td>
+            <td>INR</td>
+          </tr>
+          <tr>
+            <td>Lead Inspection Request</td>
+            <td>HDF</td>
+          </tr>
+          <tr>
+            <td>Licensed Pharmaceutical Representative Complaint</td>
+            <td>LPRC</td>
+          </tr>
+          <tr>
+            <td>Liquor Establishment Complaint</td>
+            <td>LIQUORCO</td>
+          </tr>
+          <tr>
+            <td>Low Water Pressure Complaint</td>
+            <td>WBK</td>
+          </tr>
+          <tr>
+            <td>Minimum Wage Complaint</td>
+            <td>MWC</td>
+          </tr>
+          <tr>
+            <td>Missed Garbage Pick-Up Complaint</td>
+            <td>SCC</td>
+          </tr>
+          <tr>
+            <td>No Building Permit and Construction Violation</td>
+            <td>BBD</td>
+          </tr>
+          <tr>
+            <td>No Solicitation Complaint</td>
+            <td>NOSOLCPP</td>
+          </tr>
+          <tr>
+            <td>No Water Complaint</td>
+            <td>WBJ</td>
+          </tr>
+          <tr>
+            <td>Nuisance Animal Complaint</td>
+            <td>EAB</td>
+          </tr>
+          <tr>
+            <td>Open Fire Hydrant Complaint</td>
+            <td>WBT</td>
+          </tr>
+          <tr>
+            <td>Operating Without Business License Complaint</td>
+            <td>RBL</td>
+          </tr>
+          <tr>
+            <td>Outdated Merchandise Complaint</td>
+            <td>ODM</td>
+          </tr>
+          <tr>
+            <td>Paid Sick Leave Violation</td>
+            <td>PSL</td>
+          </tr>
+          <tr>
+            <td>Pavement Cave-In Inspection Request</td>
+            <td>PBE</td>
+          </tr>
+          <tr>
+            <td>Pet Wellness Check Request</td>
+            <td>PET</td>
+          </tr>
+          <tr>
+            <td>Petcoke Dust Complaint</td>
+            <td>PETCO</td>
+          </tr>
+          <tr>
+            <td>Porch Inspection Request</td>
+            <td>BPI</td>
+          </tr>
+          <tr>
+            <td>Pothole in Street Complaint</td>
+            <td>PHF</td>
+          </tr>
+          <tr>
+            <td>Protected Bike Lane - Debris Removal</td>
+            <td>PBLDR</td>
+          </tr>
+          <tr>
+            <td>Public Vehicle/Valet Complaint</td>
+            <td>CSP</td>
+          </tr>
+          <tr>
+            <td>Pushcart Food Vendor Complaint</td>
+            <td>CORNVEND</td>
+          </tr>
+          <tr>
+            <td>Recycling Inspection Request</td>
+            <td>SCX</td>
+          </tr>
+          <tr>
+            <td>Renters and Foreclosure Complaint</td>
+            <td>RFC</td>
+          </tr>
+          <tr>
+            <td>Report an Injured Animal</td>
+            <td>EAQ</td>
+          </tr>
+          <tr>
+            <td>Restaurant Complaint</td>
+            <td>HFB</td>
+          </tr>
+          <tr>
+            <td>Ridesharing Complaint</td>
+            <td>TNP</td>
+          </tr>
+          <tr>
+            <td>Rodent Baiting/Rat Complaint</td>
+            <td>SGA</td>
+          </tr>
+          <tr>
+            <td>Sanitation Code Violation</td>
+            <td>SCB</td>
+          </tr>
+          <tr>
+            <td>Sewer Cave-In Inspection Request</td>
+            <td>AAD</td>
+          </tr>
+          <tr>
+            <td>Sewer Cleaning Inspection Request</td>
+            <td>CHECKFOR</td>
+          </tr>
+          <tr>
+            <td>Shared Housing/Vacation Rental Complaint</td>
+            <td>SHVR</td>
+          </tr>
+          <tr>
+            <td>Sidewalk Cafe Complaint</td>
+            <td>CAFE</td>
+          </tr>
+          <tr>
+            <td>Sidewalk Inspection Request</td>
+            <td>PBS</td>
+          </tr>
+          <tr>
+            <td>Sign Repair Request - All Other Signs</td>
+            <td>PCE</td>
+          </tr>
+          <tr>
+            <td>Sign Repair Request - Do Not Enter Sign</td>
+            <td>PCD</td>
+          </tr>
+          <tr>
+            <td>Sign Repair Request - One Way Sign</td>
+            <td>PCC</td>
+          </tr>
+          <tr>
+            <td>Sign Repair Request - Stop Sign</td>
+            <td>PCB</td>
+          </tr>
+          <tr>
+            <td>Smokeless Tobacco at Sports Event Complaint</td>
+            <td>HFF</td>
+          </tr>
+          <tr>
+            <td>Snow - Object/Dibs Removal Request</td>
+            <td>SDW</td>
+          </tr>
+          <tr>
+            <td>Snow - Uncleared Sidewalk Complaint</td>
+            <td>SWSNOREM</td>
+          </tr>
+          <tr>
+            <td>Snow Removal - Protected Bike Lane or Bridge Sidewalk</td>
+            <td>SNPBLBS</td>
+          </tr>
+          <tr>
+            <td>Stray Animal Complaint</td>
+            <td>EAE</td>
+          </tr>
+          <tr>
+            <td>Street Cleaning Request</td>
+            <td>SDP</td>
+          </tr>
+          <tr>
+            <td>Street Light On During Day Complaint</td>
+            <td>SFN</td>
+          </tr>
+          <tr>
+            <td>Street Light Out Complaint</td>
+            <td>SFD</td>
+          </tr>
+          <tr>
+            <td>Street Light Pole Damage Complaint</td>
+            <td>SFK</td>
+          </tr>
+          <tr>
+            <td>Street Light Pole Door Missing Complaint</td>
+            <td>SFQ</td>
+          </tr>
+          <tr>
+            <td>Tobacco - General Complaint</td>
+            <td>BAG</td>
+          </tr>
+          <tr>
+            <td>Tobacco - Sale to Minors Complaint</td>
+            <td>BAM</td>
+          </tr>
+          <tr>
+            <td>Traffic Signal Out Complaint</td>
+            <td>SFB</td>
+          </tr>
+          <tr>
+            <td>Tree Debris Clean-Up Request</td>
+            <td>SEL</td>
+          </tr>
+          <tr>
+            <td>Tree Planting Request</td>
+            <td>SED</td>
+          </tr>
+          <tr>
+            <td>Tree Removal Request</td>
+            <td>SEE</td>
+          </tr>
+          <tr>
+            <td>Tree Trim Request</td>
+            <td>SEF</td>
+          </tr>
+          <tr>
+            <td>Vacant/Abandoned Building Complaint</td>
+            <td>BBK</td>
+          </tr>
+          <tr>
+            <td>Vehicle Parked in Bike Lane Complaint</td>
+            <td>VBL</td>
+          </tr>
+          <tr>
+            <td>Viaduct Light Out Complaint</td>
+            <td>SFC</td>
+          </tr>
+          <tr>
+            <td>Vicious Animal Complaint</td>
+            <td>EAF</td>
+          </tr>
+          <tr>
+            <td>Water in Basement Complaint</td>
+            <td>AAF</td>
+          </tr>
+          <tr>
+            <td>Water On Street Complaint</td>
+            <td>AAE</td>
+          </tr>
+          <tr>
+            <td>Water Quality Concern</td>
+            <td>WCA</td>
+          </tr>
+          <tr>
+            <td>Weed Removal Request</td>
+            <td>SCP</td>
+          </tr>
+          <tr>
+            <td>Wire Basket Request</td>
+            <td>SCS</td>
+          </tr>
+          <tr>
+            <td>Yard Waste Pick-Up Request</td>
+            <td>SCQ</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </body>
 </html>
