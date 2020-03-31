@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+https://alexanderramirez.info/<!DOCTYPE html>
 <html lang="en">
   <head>
     <link rel="stylesheet" href="styles.css" />
@@ -15,6 +15,7 @@
         var request = new XMLHttpRequest();
         var request2 = new XMLHttpRequest();
         var request3 = new XMLHttpRequest();
+        var airQuality = new XMLHttpRequest();
         var markers = [];
         // Open a new connection, using the GET request on the URL endpoint
         //request.open("GET", "http://localhost:3000/", true);
@@ -48,6 +49,11 @@
             "T12:00:00%27%20and%20%27" +
             document.getElementById("endDate").value +
             "T14:00:00",
+          true
+        );
+        airQuality.open(
+          "GET",
+          "http://www.airnowapi.org/aq/observation/zipCode/historical/?format=application/json&zipCode=60601&date=2020-03-29T00-0000&distance=25&API_KEY=70D4330E-3376-4DC7-ABAC-C85E156BF36C",
           true
         );
         request.onload = function() {
@@ -103,6 +109,13 @@
           }
         };
 
+        airQuality.onload = function() {
+          // Begin accessing JSON data here
+          var data = JSON.parse(this.response);
+          console.log(data);
+          
+        };
+
         // Send requests
         if (checkBox.checked == true) {
           request.send();
@@ -113,6 +126,8 @@
         if (checkBox2.checked == true) {
           request3.send();
         }
+
+        airQuality.send();
 
         //map options
         var options = {
